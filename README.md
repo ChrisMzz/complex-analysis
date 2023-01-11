@@ -28,15 +28,14 @@ a `ComplexFunction` also has optional arguments :
 
 ### Julia render
 
-The `julia()` method returns an iterated version of the function onto itself. 
-__Note that I will update this method to limit the value to a small threshold, thereby rendering a proper approximation of a Julia Set.__
+The `julia()` method returns an iterated version of the function onto itself. The repetitive color sequencing allows you to see where the function stays bounded. **Note that a `nan` value will result in an error in the computation, which conveniently results in a black pixel render, so we don't have to explicitly tell the method to check for values that grow to $+\infty$.**
 
 
 ### Display Methods
 
 There are multiple ways to display the complex function :
 
-#### `show()` and `show_with_julia()
+#### `show()` and `show_with_julia()`
 
 The `show()` method displays the function using HLS Domain Coloring. 
 It takes one optional argument :
@@ -53,8 +52,8 @@ Examples of `show()` displays :
 
 The `show_with_julia()` method displays side-by-side renders of the function (left) and its rendered julia set (right). 
 It takes multiple optional arguments : 
-- save, which defaults to `False`, but can be a string to specify the filename.
-- coloring : the function used to color the render. Defaults to `hls_dc` Hue-Light-Saturation Domain Coloring. Use `modulus_limited_cmap_dc` to color the render using the custom `cmap`.
+- `save`, which defaults to `False`, but can be a string to specify the filename.
+- `coloring` : the function used to color the render. Defaults to `hls_dc` Hue-Light-Saturation Domain Coloring. Use `modulus_limited_cmap_dc` to color the render using the custom `cmap`.
 
 ---
 

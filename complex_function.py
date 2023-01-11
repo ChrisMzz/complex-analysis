@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from colorsys import hls_to_rgb
-
+import sympy as sp
 
 pi = np.pi
 e = np.exp(1)
@@ -26,6 +26,7 @@ def mult(z, n):
 
 def hls_to_rgba(h,l,s):
     return tuple(list(hls_to_rgb(h,l,s)) + [l*0.8])
+
 
 # from https://stackoverflow.com/a/20958684/17091581
 def hls_dc(z):
@@ -60,7 +61,6 @@ class ComplexFunction :
     def __init__(self, shape, f, **kwargs):
         self.minRe, self.maxRe, self.minIm, self.maxIm = shape
         self.f = f
-        
         if "param_f" in kwargs.keys():
             self.param_f = kwargs["param_f"]
         else:
@@ -107,8 +107,13 @@ class ComplexFunction :
             _type_: array-like complex numbers
         """
         z0 = z
-        for _ in range(self.iters):
-            z0 = self.f(z0)
+        if parametric != False:
+            for _ in range(self.iters):
+                z0 = self.param_f(z0,parametric)
+        else:            
+            for _ in range(self.iters):
+                z0 = self.f(z0)
+        
         return z0
     
     def show_with_julia(self, save=False, coloring=hls_dc):
@@ -155,6 +160,7 @@ class ComplexFunction :
     def show_parametric(self, c_vector, save=False, show_at_zero=False, show_julia_at_zero=False, show=True):
         N, minRe, maxRe, minIm, maxIm = self.N, self.minRe, self.maxRe, self.minIm, self.maxIm 
         f, z = self.param_f, self.z
+        print(f)
         fig = plt.figure()
         if show_at_zero:
             ax = plt.subplot2grid((1,2),(0,0), projection='3d')
@@ -173,10 +179,11 @@ class ComplexFunction :
         #c = np.ones((N,N,c_vector[0].size))*c_vector[0]
         #c = c.transpose(2,1,0)
         c = c_vector[0]
+        c_sequence = [2*i/(len(c)-1)-1 for i in range(len(c))]
         Z = [hls_3d_dc(f(z,i)) for i in c]
         x,y = np.mgrid[self.minRe:self.maxRe:self.N*1j, self.minIm:self.maxIm:self.N*1j]
         for i in range(c.size):
-            ax.scatter(x,y, c[i], c=[Z[i][j][k] for j in range(N) for k in range(N)], s=50/N)
+            ax.scatter(x,y, c_sequence[i], c=[Z[i][j][k] for j in range(N) for k in range(N)], s=50/N)
         if show_at_zero:
             ax2.imshow(hls_dc(f(z,0)))
             ax2.set_xticks([N*i/4 for i in range(5)], [np.round(minRe + 2*k*maxRe,2) for k in np.arange(0,1.1,1/4)])
@@ -206,17 +213,18 @@ class ComplexFunction :
         #c = np.ones((N,N,c_vector[0].size))*c_vector[0]
         #c = c.transpose(2,1,0)
         c = c_vector[0]
+        c_sequence = [2*i/(len(c)-1)-1 for i in range(len(c))]
         Z = [hls_3d_dc(f(z,i)) for i in c]
-        J = [hls_3d_dc(self.julia(z,True)) for i in c]
+        J = [hls_3d_dc(self.julia(z,i)) for i in c]
         x,y = np.mgrid[self.minRe:self.maxRe:self.N*1j, self.minIm:self.maxIm:self.N*1j]
-        for i in range(c.size):
-            ax.scatter(x,y, c[i], c=[Z[i][j][k] for j in range(N) for k in range(N)], s=50/N)
-            axj.scatter(x,y, c[i], c=[J[i][j][k] for j in range(N) for k in range(N)], s=50/N)
+        for i in range(len(c)):
+            ax.scatter(x,y, c_sequence[i], c=[Z[i][j][k] for j in range(N) for k in range(N)], s=50/N)
+            axj.scatter(x,y, c_sequence[i], c=[J[i][j][k] for j in range(N) for k in range(N)], s=50/N)
 
         ax2.imshow(hls_dc(f(z,0)))
         ax2.set_xticks([N*i/4 for i in range(5)], [np.round(minRe + 2*k*maxRe,2) for k in np.arange(0,1.1,1/4)])
         ax2.set_yticks([N*i/4 for i in range(5)], [np.round(minIm + 2*k*maxIm,2) for k in np.arange(0,1.1,1/4)])
-        axj2.imshow(hls_dc(self.julia(z)))
+        axj2.imshow(hls_dc(self.julia(z, 0)))
         axj2.set_xticks([N*i/4 for i in range(5)], [np.round(minRe + 2*k*maxRe,2) for k in np.arange(0,1.1,1/4)])
         axj2.set_yticks([N*i/4 for i in range(5)], [np.round(minIm + 2*k*maxIm,2) for k in np.arange(0,1.1,1/4)])
         if show:
